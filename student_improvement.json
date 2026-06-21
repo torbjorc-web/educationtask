@@ -1,0 +1,27 @@
+[
+  {
+    "student_name": "Emma Johnson",
+    "dates": ["2026-06-10", "2026-06-15", "2026-06-20"],
+    "scores": [60, 80, 100]
+  },
+  {
+    "student_name": "Michael Chen",
+    "dates": ["2026-06-12", "2026-06-18"],
+    "scores": [40, 60]
+  },
+  {
+    "student_name": "Sophia Rodriguez",
+    "dates": ["2026-06-14"],
+    "scores": [80]
+  },
+  {
+    "student_name": "James Williams",
+    "dates": ["2026-06-16", "2026-06-21"],
+    "scores": [20, 40]
+  },
+  {
+    "student_name": "Olivia Brown",
+    "dates": ["2026-06-11"],
+    "scores": [100]
+  }
+]
