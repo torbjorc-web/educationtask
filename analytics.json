@@ -1,0 +1,31 @@
+{
+  "total_students": 5,
+  "total_attempts": 9,
+  "average_score": 64.4,
+  "best_score": 100,
+  "worst_score": 20,
+  "average_time_taken": 8.1,
+  "students_by_performance": {
+    "excellent (90-100%)": 2,
+    "good (70-89%)": 2,
+    "fair (50-69%)": 2,
+    "needs improvement (<50%)": 3
+  },
+  "difficulty_breakdown": {
+    "beginner": {
+      "correct": 16,
+      "total": 18,
+      "percentage": 88.9
+    },
+    "intermediate": {
+      "correct": 8,
+      "total": 18,
+      "percentage": 44.4
+    },
+    "advanced": {
+      "correct": 3,
+      "total": 9,
+      "percentage": 33.3
+    }
+  }
+}
