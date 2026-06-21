@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Teacher Dashboard Upload Export</title>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f7fb;margin:0;padding:20px;color:#1f2937}
+.container{max-width:1200px;margin:0 auto}
+.header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:24px;border-radius:16px}
+.panel{background:#fff;border-radius:14px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.08);margin-top:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:20px 0}
+.card{background:#fff;border-radius:14px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.kpi{font-size:2rem;font-weight:700;margin-top:8px}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left}
+.badge{padding:4px 10px;border-radius:999px;font-size:.8rem;font-weight:700}
+.good{background:#dcfce7;color:#166534}.warn{background:#fef3c7;color:#92400e}.bad{background:#fee2e2;color:#991b1b}
+input[type=file]{display:block;margin:8px 0 12px}
+button{background:#667eea;color:#fff;border:none;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;margin-right:8px;margin-top:6px}
+small{color:#6b7280}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Teacher Dashboard</h1>
+    <p>Upload JSON files, visualize progress, and export the merged data.</p>
+  </div>
+
+  <div class="panel">
+    <h2>Upload Data Files</h2>
+    <div class="grid">
+      <div>
+        <strong>Quiz data</strong>
+        <input type="file" id="quizFile" accept="application/json">
+        <small>Expected: {"quiz": [...]}</small>
+      </div>
+      <div>
+        <strong>Analytics data</strong>
+        <input type="file" id="analyticsFile" accept="application/json">
+        <small>Expected: totals, averages, breakdowns</small>
+      </div>
+      <div>
+        <strong>Student progress</strong>
+        <input type="file" id="progressFile" accept="application/json">
+        <small>Expected: list of students with attempts</small>
+      </div>
+    </div>
+    <div>
+      <button id="loadBtn">Load Uploaded Files</button>
+      <button id="exportJsonBtn">Export JSON</button>
+      <button id="exportCsvBtn">Export CSV</button>
+    </div>
+    <p id="statusText"><small>No file loaded yet. Sample data is shown below.</small></p>
+  </div>
+
+  <div class="grid" id="kpis"></div>
+
+  <div class="panel">
+    <h2>Performance Trends</h2>
+    <div id="trendChart" style="height:420px;"></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel"><h2>Performance Distribution</h2><div id="distributionChart" style="height:360px;"></div></div>
+    <div class="panel"><h2>Difficulty Breakdown</h2><div id="difficultyChart" style="height:360px;"></div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Student Summary</h2>
+    <table class="table"><thead><tr><th>Student</th><th>Attempts</th><th>Latest Score</th><th>Change</th><th>Status</th></tr></thead><tbody id="summaryBody"></tbody></table>
+  </div>
+
+  <div class="panel">
+    <h2>Quiz Overview</h2>
+    <table class="table"><thead><tr><th>#</th><th>Difficulty</th><th>Question</th><th>Answer</th></tr></thead><tbody id="quizBody"></tbody></table>
+  </div>
+</div>
+
+<script>
+const fallbackQuiz = {quiz:[
+  {id:1,difficulty:'beginner',question:'What is photosynthesis?',answer:'The process plants use to convert light energy into chemical energy'},
+  {id:2,difficulty:'beginner',question:'Which gas do plants absorb during photosynthesis?',answer:'Carbon dioxide'},
+  {id:3,difficulty:'intermediate',question:'What is the primary pigment involved in photosynthesis?',answer:'Chlorophyll'},
+  {id:4,difficulty:'intermediate',question:'Where does photosynthesis primarily occur in a plant cell?',answer:'Chloroplasts'},
+  {id:5,difficulty:'advanced',question:'What is the chemical equation for photosynthesis?',answer:'6CO2 + 6H2O + light energy → C6H12O6 + 6O2'}
+]};
+const fallbackAnalytics = {total_students:5,total_attempts:9,average_score:64.4,best_score:100,worst_score:20,average_time_taken:8.1,students_by_performance:{'excellent (90-100%)':2,'good (70-89%)':2,'fair (50-69%)':2,'needs improvement (<50%)':3},difficulty_breakdown:{beginner:{percentage:88.9},intermediate:{percentage:44.4},advanced:{percentage:33.3}}};
+const fallbackProgress = [
+  {student_name:'Emma Johnson',dates:['2026-06-10','2026-06-15','2026-06-20'],scores:[60,80,100]},
+  {student_name:'Michael Chen',dates:['2026-06-12','2026-06-18'],scores:[40,60]},
+  {student_name:'Sophia Rodriguez',dates:['2026-06-14'],scores:[80]},
+  {student_name:'James Williams',dates:['2026-06-16','2026-06-21'],scores:[20,40]},
+  {student_name:'Olivia Brown',dates:['2026-06-11'],scores:[100]}
+];
+
+let currentQuiz = fallbackQuiz;
+let currentAnalytics = fallbackAnalytics;
+let currentProgress = fallbackProgress;
+
+function renderAll(){
+  const kpis=[['Students',currentAnalytics.total_students],['Attempts',currentAnalytics.total_attempts],['Avg Score',currentAnalytics.average_score.toFixed(1)+'%'],['Avg Time',currentAnalytics.average_time_taken.toFixed(1)+' min']];
+  document.getElementById('kpis').innerHTML = kpis.map(([label,val])=>`<div class="card"><div>${label}</div><div class="kpi">${val}</div></div>`).join('');
+
+  Plotly.newPlot('distributionChart',[{type:'pie',hole:.35,labels:Object.keys(currentAnalytics.students_by_performance),values:Object.values(currentAnalytics.students_by_performance),textinfo:'label+percent'}],{margin:{t:20,b:20,l:20,r:20}});
+  Plotly.newPlot('difficultyChart',[{type:'bar',x:Object.keys(currentAnalytics.difficulty_breakdown),y:Object.values(currentAnalytics.difficulty_breakdown).map(x=>x.percentage),marker:{color:['#22c55e','#f59e0b','#ef4444']}}],{yaxis:{range:[0,100],title:'% Correct'},margin:{t:20,b:40,l:40,r:20}});
+  Plotly.newPlot('trendChart',currentProgress.map(s=>({type:'scatter',mode:'lines+markers',name:s.student_name,x:s.dates,y:s.scores})),{yaxis:{range:[0,100],title:'Score %'},xaxis:{title:'Date'},margin:{t:20,b:40,l:50,r:20}});
+
+  document.getElementById('summaryBody').innerHTML = currentProgress.map(s=>{const latest=s.scores[s.scores.length-1];const change=s.scores.length>1?latest-s.scores[0]:0;const status=latest>=90?'<span class="badge good">Excellent</span>':latest>=70?'<span class="badge warn">Good</span>':'<span class="badge bad">Needs Support</span>';return `<tr><td>${s.student_name}</td><td>${s.scores.length}</td><td>${latest}%</td><td>${change>=0?'+':''}${change}%</td><td>${status}</td></tr>`;}).join('');
+  document.getElementById('quizBody').innerHTML = currentQuiz.quiz.map(q=>`<tr><td>${q.id}</td><td>${q.difficulty}</td><td>${q.question}</td><td>${q.answer}</td></tr>`).join('');
+}
+
+function readFile(file){
+  return new Promise((resolve,reject)=>{
+    if(!file) return resolve(null);
+    const reader = new FileReader();
+    reader.onload = () => { try { resolve(JSON.parse(reader.result)); } catch(e){ reject(e); } };
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+}
+
+function download(filename, text, mime='application/json'){
+  const blob = new Blob([text], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function toCSV(){
+  const rows = [['student_name','attempts','latest_score','change_percent','status']];
+  currentProgress.forEach(s=>{ const latest=s.scores[s.scores.length-1]; const change=s.scores.length>1?latest-s.scores[0]:0; const status=latest>=90?'Excellent':latest>=70?'Good':'Needs Support'; rows.push([s.student_name,s.scores.length,latest,(change>=0?'+':'')+change,status]); });
+  const qrows = [['question_id','difficulty','question','answer']];
+  currentQuiz.quiz.forEach(q=>qrows.push([q.id,q.difficulty,q.question,q.answer]));
+  return {progressCSV: rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n'), quizCSV: qrows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')};
+}
+
+document.getElementById('loadBtn').addEventListener('click', async ()=>{
+  try{
+    const quiz = await readFile(document.getElementById('quizFile').files[0]);
+    const analytics = await readFile(document.getElementById('analyticsFile').files[0]);
+    const progress = await readFile(document.getElementById('progressFile').files[0]);
+    if(quiz) currentQuiz = quiz;
+    if(analytics) currentAnalytics = analytics;
+    if(progress) currentProgress = progress;
+    document.getElementById('statusText').innerHTML = '<small>Files loaded successfully. Dashboard updated.</small>';
+    renderAll();
+  } catch(err){
+    document.getElementById('statusText').innerHTML = '<small>Could not parse one or more JSON files. Please check the format.</small>';
+  }
+});
+
+document.getElementById('exportJsonBtn').addEventListener('click', ()=>{
+  const payload = {quiz: currentQuiz, analytics: currentAnalytics, progress: currentProgress};
+  download('dashboard_export.json', JSON.stringify(payload, null, 2), 'application/json');
+  document.getElementById('statusText').innerHTML = '<small>Exported merged dashboard data as JSON.</small>';
+});
+
+document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
+  const csv = toCSV();
+  const merged = '--- Progress ---\n' + csv.progressCSV + '\n\n--- Quiz ---\n' + csv.quizCSV;
+  download('dashboard_export.csv', merged, 'text/csv');
+  document.getElementById('statusText').innerHTML = '<small>Exported merged dashboard data as CSV.</small>';
+});
+
+renderAll();
+</script>
+</body>
+</html>
