@@ -1,30 +1,28 @@
-# AI Quiz Generator and Teacher Dashboard
+# AI Quiz Generator Project
 
-This project builds an AI-powered quiz generator using LangChain chain composition and provides a browser-based quiz app plus a teacher dashboard.
+This project generates quiz questions with LangChain and presents them in an interactive quiz app plus a teacher dashboard.
+
+## Files in This Repo
+
+- `script.py` — main Python entry point for quiz generation.
+- `quizapp.html` — interactive quiz application for students.
+- `teacherdashboard.html` — teacher dashboard for viewing progress data.
+- `quiz_data.json` — generated quiz questions and answers.
+- `analytics.json` — aggregated performance analytics.
+- `student_improvement.json` — student progress over time.
 
 ## Features
 
 - Generate beginner, intermediate, and advanced quiz questions.
-- Create detailed answers and explanations.
-- Present quizzes in an interactive browser form.
-- Track student progress over time in a teacher dashboard.
-- Upload JSON files directly in the dashboard.
+- Create answers and explanations for each question.
+- Display the quiz in a browser-based HTML app.
+- Track student performance over time in a dashboard.
+- Load dashboard data from JSON files.
 - Export merged dashboard data as JSON or CSV.
-
-## Project Files
-
-- `quiz_app.py` — Python code for generating quiz data.
-- `quiz_app.html` — Interactive quiz student interface.
-- `teacher_dashboard.html` — Dashboard with embedded sample data.
-- `teacher_dashboard_upload.html` — Dashboard that accepts uploaded JSON files.
-- `teacher_dashboard_upload_export.html` — Dashboard with upload and export support.
-- `quiz_data.json` — Example quiz data output.
-- `analytics.json` — Example analytics summary.
-- `student_improvement.json` — Example student progress data.
 
 ## Requirements
 
-Install these packages in your notebook or environment:
+Install the required Python packages:
 
 ```bash
 pip install langchain langchain-community langchain-google-genai pandas
@@ -35,11 +33,11 @@ You also need a Google Gemini API key.
 ## API Key Setup
 
 ### Google Colab
-- Open the secrets panel.
+- Use Colab secrets.
 - Add `GEMINI_API_KEY`.
 - Enable notebook access.
 
-### Local Jupyter / VS Code
+### Local Jupyter or VS Code
 - Set an environment variable, or use a `.env` file.
 
 Example:
@@ -50,36 +48,18 @@ export GEMINI_API_KEY="your_key_here"
 
 ## How It Works
 
-### 1. Quiz generation
-The Python code uses LangChain with:
-- `PromptTemplate`
-- `LLMChain`
-- `SequentialChain`
+### 1. Python generation
+`script.py` uses LangChain components to generate quiz questions, answers, and explanations, then saves them to `quiz_data.json`.
 
-The first chain creates quiz questions. The second chain generates answers and explanations.
-
-### 2. Student quiz app
-The HTML quiz app displays questions, accepts answers, grades them, and shows explanations.
+### 2. Quiz app
+`quizapp.html` lets students answer the generated questions in the browser and view instant results.
 
 ### 3. Teacher dashboard
-The dashboard shows:
-- Total students
-- Attempts
-- Average score
-- Performance distribution
-- Difficulty breakdown
-- Student progress trends
-- Quiz overview
+`teacherdashboard.html` shows student summaries, charts, quiz overview, and performance trends.
 
-### 4. Upload and export
-The upload dashboard lets you:
-- Load quiz and progress JSON files
-- Export merged data as JSON
-- Export merged data as CSV
+## Example JSON Structures
 
-## Example JSON Formats
-
-### Quiz data
+### quiz_data.json
 ```json
 {
   "quiz": [
@@ -94,7 +74,7 @@ The upload dashboard lets you:
 }
 ```
 
-### Analytics data
+### analytics.json
 ```json
 {
   "total_students": 5,
@@ -117,7 +97,7 @@ The upload dashboard lets you:
 }
 ```
 
-### Student progress data
+### student_improvement.json
 ```json
 [
   {
@@ -130,33 +110,23 @@ The upload dashboard lets you:
 
 ## Usage
 
-### Generate quiz data
-Run the Python script to create `quiz_data.json`.
+### Run the generator
+Execute `script.py` to create or refresh `quiz_data.json`.
 
 ### Open the quiz app
-Open `quiz_app.html` in a browser.
+Open `quizapp.html` in your browser.
 
 ### Open the teacher dashboard
-Open `teacher_dashboard_upload_export.html` in a browser.
-
-### Upload files
-Load your JSON files through the upload form in the dashboard.
-
-## Notes
-
-- The dashboard uses Plotly from a CDN.
-- The upload version can run with sample data if no files are provided.
-- You can customize topics, languages, and difficulty levels in the Python code.
+Open `teacherdashboard.html` in your browser.
 
 ## Suggested Folder Layout
 
 ```text
 project/
-├── quiz_app.py
-├── quiz_app.html
-├── teacher_dashboard.html
-├── teacher_dashboard_upload.html
-├── teacher_dashboard_upload_export.html
+├── script.py
+├── quizapp.html
+├── teacherdashboard.html
+├── README.md
 ├── quiz_data.json
 ├── analytics.json
 └── student_improvement.json
