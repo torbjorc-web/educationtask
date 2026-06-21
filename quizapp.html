@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Interactive Quiz</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f7fb;margin:0;padding:20px;color:#111827}
+.container{max-width:900px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.08);overflow:hidden}
+.header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:24px}
+.content{padding:24px}
+.card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:14px;padding:18px;margin-bottom:16px}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.8rem;font-weight:700;margin-bottom:10px}
+.beginner{background:#dcfce7;color:#166534}.intermediate{background:#fef3c7;color:#92400e}.advanced{background:#fee2e2;color:#991b1b}
+input{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:10px;font-size:1rem}
+button{background:#667eea;color:#fff;border:none;padding:14px 18px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;width:100%;margin-top:12px}
+.results{display:none;margin-top:20px}
+.feedback{border-left:4px solid #d1d5db;padding:12px 14px;margin-bottom:12px;background:#fff}
+.correct{border-left-color:#16a34a;background:#ecfdf5}.wrong{border-left-color:#dc2626;background:#fef2f2}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>Quiz</h1><p>Answer the questions below and submit your responses.</p></div>
+  <div class="content">
+    <form id="quizForm"></form>
+    <button onclick="gradeQuiz()">Submit Answers</button>
+    <div class="results" id="results"></div>
+  </div>
+</div>
+<script>
+const quizData = {
+  quiz: [
+    {id:1,difficulty:'beginner',question:'What is photosynthesis?',answer:'The process plants use to convert light energy into chemical energy',explanation:'Plants convert light, water, and carbon dioxide into glucose and oxygen.'},
+    {id:2,difficulty:'beginner',question:'Which gas do plants absorb during photosynthesis?',answer:'Carbon dioxide',explanation:'Plants absorb carbon dioxide through stomata.'},
+    {id:3,difficulty:'intermediate',question:'What is the primary pigment involved in photosynthesis?',answer:'Chlorophyll',explanation:'Chlorophyll absorbs light energy for photosynthesis.'},
+    {id:4,difficulty:'intermediate',question:'Where does photosynthesis primarily occur in a plant cell?',answer:'Chloroplasts',explanation:'Chloroplasts contain chlorophyll and are the site of photosynthesis.'},
+    {id:5,difficulty:'advanced',question:'What is the chemical equation for photosynthesis?',answer:'6CO2 + 6H2O + light energy → C6H12O6 + 6O2',explanation:'This is the balanced overall equation for photosynthesis.'}
+  ]
+};
+
+const form = document.getElementById('quizForm');
+quizData.quiz.forEach((q, i) => {
+  form.innerHTML += `<div class="card"><div class="badge ${q.difficulty}">${q.difficulty}</div><div><strong>${i+1}. ${q.question}</strong></div><div style="margin-top:10px"><input id="a${i}" placeholder="Type your answer"></div></div>`;
+});
+
+function normalize(s){return (s||'').toLowerCase().trim().replace(/\s+/g,' ')}
+
+function gradeQuiz(){
+  let correct = 0;
+  const out = [];
+  quizData.quiz.forEach((q, i) => {
+    const user = document.getElementById(`a${i}`).value;
+    const ok = normalize(user) === normalize(q.answer) || normalize(q.answer).includes(normalize(user)) && normalize(user).length > 0;
+    if (ok) correct += 1;
+    out.push(`<div class="feedback ${ok ? 'correct' : 'wrong'}"><div><strong>Q${i+1}:</strong> ${q.question}</div><div><strong>Your answer:</strong> ${user || '(blank)'}</div><div><strong>Correct answer:</strong> ${q.answer}</div><div><strong>Explanation:</strong> ${q.explanation}</div></div>`);
+  });
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').innerHTML = `<h2>Score: ${correct}/${quizData.quiz.length} (${Math.round(correct/quizData.quiz.length*100)}%)</h2>` + out.join('');
+  document.getElementById('results').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
