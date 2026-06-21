@@ -1,0 +1,39 @@
+{
+  "quiz": [
+    {
+      "id": 1,
+      "difficulty": "beginner",
+      "question": "What is photosynthesis?",
+      "answer": "The process plants use to convert light energy into chemical energy",
+      "explanation": "Plants convert light, water, and carbon dioxide into glucose and oxygen."
+    },
+    {
+      "id": 2,
+      "difficulty": "beginner",
+      "question": "Which gas do plants absorb during photosynthesis?",
+      "answer": "Carbon dioxide",
+      "explanation": "Plants absorb carbon dioxide through stomata."
+    },
+    {
+      "id": 3,
+      "difficulty": "intermediate",
+      "question": "What is the primary pigment involved in photosynthesis?",
+      "answer": "Chlorophyll",
+      "explanation": "Chlorophyll absorbs light energy for photosynthesis."
+    },
+    {
+      "id": 4,
+      "difficulty": "intermediate",
+      "question": "Where does photosynthesis primarily occur in a plant cell?",
+      "answer": "Chloroplasts",
+      "explanation": "Chloroplasts contain chlorophyll and are the site of photosynthesis."
+    },
+    {
+      "id": 5,
+      "difficulty": "advanced",
+      "question": "What is the chemical equation for photosynthesis?",
+      "answer": "6CO2 + 6H2O + light energy → C6H12O6 + 6O2",
+      "explanation": "This is the balanced overall equation for photosynthesis."
+    }
+  ]
+}
